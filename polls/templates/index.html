@@ -1,55 +1,155 @@
 <html lang="en">
-  <head>
+<head>
     <link rel="stylesheet" href="/static/ol.css" type="text/css">
     <style>
-      .map {
-        height: 80%;
-        width: 100%;
-      }
+        .map {
+            height: 80%;
+            width: 100%;
+        }
+        .ol-popup {
+            position: absolute;
+            background-color: white;
+            -webkit-filter: drop-shadow(0 1px 4px rgba(0,0,0,0.2));
+            filter: drop-shadow(0 1px 4px rgba(0,0,0,0.2));
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #cccccc;
+            bottom: 12px;
+            left: -50px;
+            min-width: 280px;
+        }
+        .ol-popup:after, .ol-popup:before {
+            top: 100%;
+            border: solid transparent;
+            content: " ";
+            height: 0;
+            width: 0;
+            position: absolute;
+            pointer-events: none;
+        }
+        .ol-popup:after {
+            border-top-color: white;
+            border-width: 10px;
+            left: 48px;
+            margin-left: -10px;
+        }
+        .ol-popup:before {
+            border-top-color: #cccccc;
+            border-width: 11px;
+            left: 48px;
+            margin-left: -11px;
+        }
+        .ol-popup-closer {
+            text-decoration: none;
+            position: absolute;
+            top: 2px;
+            right: 8px;
+        }
+        .ol-popup-closer:after {
+            content: "✖";
+        }
     </style>
     <script src="/static/ol.js" type="text/javascript"></script>
     <title>OpenLayers</title>
-  </head>
-  <body>
-    <h2>OpenLayers Map</h2>
-    <div id="map" class="map"></div>
+</head>
+<body>
+<h2>OpenLayers Map</h2>
+<div id="map" class="map"></div>
+<div id="popup" class="ol-popup">
+    <a href="#" id="popup-closer" class="ol-popup-closer"></a>
+    <div id="popup-content"></div>
+</div>
 
-    <a href="/add"> Add Map Image </a>
+<a href="/add"> Add Map Image </a>
 
-    {% if all_map_image %}
-        <ul>
-            {% for map_image in all_map_image %}
-                <a href="/{{map_image.id}}"><li> {{ map_image.name }} </li> </a>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p> No images are available. </p>
-    {% endif %}
+{% if all_map_image %}
+    <ul>
+        {% for map_image in all_map_image %}
+            <a href="/{{map_image.id}}"><li> {{ map_image.name }} </li> </a>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p> No images are available. </p>
+{% endif %}
 
-    <script type="text/javascript">
+<script type="text/javascript">
 
-        var vectorSource = new ol.source.Vector({
-            features: (new ol.format.GeoJSON()).readFeatures({{ geojson | safe }})
-        });
+    var container = document.getElementById('popup');
+    var content = document.getElementById('popup-content');
+    var closer = document.getElementById('popup-closer');
 
-      var map = new ol.Map({
+
+    var vectorSource = new ol.source.Vector({
+        features: (new ol.format.GeoJSON()).readFeatures({{ geojson | safe }})
+    });
+
+    var image = new ol.style.Circle({
+			radius: 5,
+			fill: new ol.style.Fill({
+				color: 'rgba(255, 255, 0, 0.8)'
+			}),
+			stroke: new ol.style.Stroke({color: 'red', width: 1})
+		});
+
+    /**
+     * Create an overlay to anchor the popup to the map.
+     */
+    var overlay = new ol.Overlay(/** @type {olx.OverlayOptions} */ ({
+        element: container,
+        autoPan: true,
+        autoPanAnimation: {
+            duration: 250
+        }
+    }));
+
+
+    /**
+     * Add a click handler to hide the popup.
+     * @return {boolean} Don't follow the href.
+     */
+    closer.onclick = function() {
+        overlay.setPosition(undefined);
+        closer.blur();
+        return false;
+    };
+
+    var map = new ol.Map({
+        overlays: [overlay],
         target: 'map',
         layers: [
-          new ol.layer.Tile({
-            source: new ol.source.OSM()
-          }),
-          new ol.layer.Vector({
-              title: 'added Layer',
-              source: vectorSource
-           })
+            new ol.layer.Tile({
+                source: new ol.source.OSM()
+            }),
+            new ol.layer.Vector({
+                title: 'added Layer',
+                source: vectorSource,
+                style: new ol.style.Style({
+					image: image
+				}),
+            })
         ],
         view: new ol.View({
-          center: ol.proj.fromLonLat([-72.093788, 18.653238]),
-          zoom: 8
+            center: ol.proj.fromLonLat([-72.093788, 18.653238]),
+            zoom: 8
         })
-      });
-    </script>
-  </body>
-</html>
+    });
 
-</style>
+    map.on('singleclick', function(evt) {
+        var coordinate = evt.coordinate;
+        var feature = map.forEachFeatureAtPixel(evt.pixel,
+                function(feature, layer) {
+                    return feature;
+                });
+        if(feature) {
+            content.innerHTML = '<a href="'+feature.get('pk')+'"><p>' + feature.get('name') + '</p></a>';
+            content.innerHTML += '<br><img src="/site_media/media/'+feature.get('image')+'" height="200" />';
+            overlay.setPosition(coordinate);
+        } else {
+            overlay.setPosition(undefined);
+            closer.blur();
+            return false;
+        }
+    });
+</script>
+</body>
+</html>

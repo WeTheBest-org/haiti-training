@@ -17,7 +17,7 @@ class IndexView(ListView):
 
 	def get_context_data(self, **kwargs):
 		context = super(IndexView, self).get_context_data(**kwargs)
-		context['geojson'] = serialize('geojson', MapImage.objects.all(), geometry_field='location', fields=('name', 'image'))
+		context['geojson'] = serialize('geojson', MapImage.objects.all(), geometry_field='location', fields=('name', 'pk', 'image'))
 		return context
 
 	def get_queryset(self):
