@@ -1,0 +1,9 @@
+{% if all_map_image %}
+	<ul>
+		{% for map_image in all_map_image %}
+			<li> {{ map_image.name }} </li>
+		{% endfor %}
+	</ul>
+{% else %}
+	<p> No images are available. </p>
+{% endif %}

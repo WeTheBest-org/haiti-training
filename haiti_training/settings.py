@@ -38,6 +38,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'polls',
+    'django.contrib.gis',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -77,10 +78,16 @@ WSGI_APPLICATION = 'haiti_training.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        'NAME': 'gis',
+        'USER': 'docker',
+        'PASSWORD': 'docker',
+        'HOST': 'localhost',
+        'PORT': 25432,
+        'TEST_NAME': 'unittests',
     }
 }
+
 
 
 # Internationalization
@@ -101,3 +108,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
 STATIC_URL = '/static/'
+
+PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
+MEDIA_ROOT = os.path.join(PROJECT_ROOT, 'site_media', 'media')
+MEDIA_URL = '/site_media/media/'
