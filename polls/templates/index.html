@@ -1,9 +1,55 @@
-{% if all_map_image %}
-	<ul>
-		{% for map_image in all_map_image %}
-			<a href="/{{map_image.id}}"><li> {{ map_image.name }} </li> </a>
-		{% endfor %}
-	</ul>
-{% else %}
-	<p> No images are available. </p>
-{% endif %}
+<html lang="en">
+  <head>
+    <link rel="stylesheet" href="/static/ol.css" type="text/css">
+    <style>
+      .map {
+        height: 80%;
+        width: 100%;
+      }
+    </style>
+    <script src="/static/ol.js" type="text/javascript"></script>
+    <title>OpenLayers</title>
+  </head>
+  <body>
+    <h2>OpenLayers Map</h2>
+    <div id="map" class="map"></div>
+
+    <a href="/add"> Add Map Image </a>
+
+    {% if all_map_image %}
+        <ul>
+            {% for map_image in all_map_image %}
+                <a href="/{{map_image.id}}"><li> {{ map_image.name }} </li> </a>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p> No images are available. </p>
+    {% endif %}
+
+    <script type="text/javascript">
+
+        var vectorSource = new ol.source.Vector({
+            features: (new ol.format.GeoJSON()).readFeatures({{ geojson | safe }})
+        });
+
+      var map = new ol.Map({
+        target: 'map',
+        layers: [
+          new ol.layer.Tile({
+            source: new ol.source.OSM()
+          }),
+          new ol.layer.Vector({
+              title: 'added Layer',
+              source: vectorSource
+           })
+        ],
+        view: new ol.View({
+          center: ol.proj.fromLonLat([-72.093788, 18.653238]),
+          zoom: 8
+        })
+      });
+    </script>
+  </body>
+</html>
+
+</style>
