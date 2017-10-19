@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.template import loader
-from django.views.generic import ListView
+from django.views.generic import ListView, DetailView
 from django.views.generic.edit import FormView
 
 from .models import MapImage
@@ -26,7 +26,11 @@ class InsertView(FormView):
 		# This method is called when valid form data has been POSTed
 		post = form.save(commit=False)
 		post.name = self.request.POST.get('name')
-		post.image = self.request.POST.get('image')
+		post.image = self.request.FILES.get('image')
 		post.location = self.request.POST.get('location')
 		post.save()
 		return super(InsertView, self).form_valid(form)
+
+class MapDetailView(DetailView):
+	template_name = 'map_detail.html'
+	model = MapImage

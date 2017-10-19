@@ -1,7 +1,7 @@
 {% if all_map_image %}
 	<ul>
 		{% for map_image in all_map_image %}
-			<li> {{ map_image.name }} </li>
+			<a href="/{{map_image.id}}"><li> {{ map_image.name }} </li> </a>
 		{% endfor %}
 	</ul>
 {% else %}
