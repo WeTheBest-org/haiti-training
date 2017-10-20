@@ -15,7 +15,7 @@ RUN apt-get -y install \
 ADD requirements.txt /requirements.txt
 RUN pip install -r /requirements.txt
 
-RUN apt-get -y install postgresql-9.4
+RUN apt-get -y install postgresql-client
 
 ADD wait-for-postgis.sh /wait-for-postgis.sh
 RUN chmod 0755 /wait-for-postgis.sh

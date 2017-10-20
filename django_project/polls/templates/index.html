@@ -78,6 +78,8 @@
     var content = document.getElementById('popup-content');
     var closer = document.getElementById('popup-closer');
 
+    console.log({{ geojson | safe }});
+
 
     var vectorSource = new ol.source.Vector({
         features: (new ol.format.GeoJSON()).readFeatures({{ geojson | safe }})
