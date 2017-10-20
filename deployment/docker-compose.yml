@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  db:
+    image: kartoza/geonode_db
+    container_name: haititraining_db
+    restart: on-failure:5
+    environment:
+      - USERNAME=docker
+      - PASS=docker
+  web:
+    build: ./docker
+    image: haiti_webapp
+    container_name: haititraining_web
+    command: ["/./wait-for-postgis.sh", "db", "/./docker-entrypoint.sh"]
+    volumes:
+      - ../django_project:/home/web/django_project
+    environment:
+      - PGPASSWORD=docker
+    ports:
+      - "8088:8080"
+    depends_on:
+      - db
+    links:
+      - db:db
